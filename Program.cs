@@ -15,7 +15,6 @@ namespace ParkingLotManagementSystem
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
             PrintHeader("EXTENSIBLE MULTI-FLOOR PARKING LOT SYSTEM - LLD DEMO");
 
             IParkingLotService parkingService = new ParkingLotService();
@@ -41,7 +40,7 @@ namespace ParkingLotManagementSystem
             parkingService.AddSlot(2, 3, VehicleType.CAR);
             parkingService.AddSlot(2, 4, VehicleType.TRUCK);
 
-            Console.WriteLine("✅ Parking Lot 'LOT-01' initialized with 2 Floors and 9 Total Slots.");
+            Console.WriteLine("[INFO] Parking Lot 'LOT-01' initialized with 2 Floors and 9 Total Slots.");
 
             // --------------------------------------------------------------------------------
             // OPERATION 2: Normal Vehicle Parking (Bike, Car, Truck)
@@ -64,7 +63,7 @@ namespace ParkingLotManagementSystem
             // --------------------------------------------------------------------------------
             PrintSection("OPERATION 3: Viewing Free Slots & Displaying Occupancy Report");
 
-            Console.WriteLine("📌 Free Car Slots Available:");
+            Console.WriteLine("[INFO] Free Car Slots Available:");
             var freeCarSlots = parkingService.ViewFreeSlots(VehicleType.CAR);
             foreach (var slot in freeCarSlots)
             {
@@ -79,12 +78,12 @@ namespace ParkingLotManagementSystem
             PrintSection("OPERATION 4: Validation Edge Case - Attempting Duplicate Vehicle Parking");
             try
             {
-                Console.WriteLine("⚠️ Attempting to park vehicle 'KA-05-CR-2002' again while already parked...");
+                Console.WriteLine("[ATTEMPT] Attempting to park vehicle 'KA-05-CR-2002' again while already parked...");
                 parkingService.ParkVehicle(VehicleType.CAR, "KA-05-CR-2002", "Blue", baseTime.AddMinutes(15));
             }
             catch (DuplicateVehicleParkingException ex)
             {
-                Console.WriteLine($"❌ [EXPECTED EXCEPTION CAUGHT] {ex.Message}");
+                Console.WriteLine($"[EXPECTED EXCEPTION CAUGHT] {ex.Message}");
             }
 
             // --------------------------------------------------------------------------------
@@ -97,12 +96,12 @@ namespace ParkingLotManagementSystem
                 var ticketTruck2 = parkingService.ParkVehicle(VehicleType.TRUCK, "KA-03-TR-4004", "Yellow", baseTime);
                 Console.WriteLine($"[PARK SUCCESS] Filled second truck slot: {ticketTruck2.SlotId}");
 
-                Console.WriteLine("⚠️ Attempting to park a 3rd Truck when capacity is 2...");
+                Console.WriteLine("[ATTEMPT] Attempting to park a 3rd Truck when capacity is 2...");
                 parkingService.ParkVehicle(VehicleType.TRUCK, "KA-03-TR-9999", "Green", baseTime);
             }
             catch (SlotUnavailableException ex)
             {
-                Console.WriteLine($"❌ [EXPECTED EXCEPTION CAUGHT] {ex.Message}");
+                Console.WriteLine($"[EXPECTED EXCEPTION CAUGHT] {ex.Message}");
             }
 
             // --------------------------------------------------------------------------------
@@ -111,10 +110,10 @@ namespace ParkingLotManagementSystem
             PrintSection("OPERATION 6: Unparking Vehicle & Fee Calculation (Flat Hourly Rate)");
 
             DateTime carExitTime = baseTime.AddHours(3).AddMinutes(15); // 3h 15m => 4 hours billed
-            Console.WriteLine($"ℹ️ Unparking Car '{ticket2.LicensePlate}' (Ticket: {ticket2.TicketId}). Billed Duration: 3h 15m (rounded up to 4 hrs)");
+            Console.WriteLine($"[INFO] Unparking Car '{ticket2.LicensePlate}' (Ticket: {ticket2.TicketId}). Billed Duration: 3h 15m (rounded up to 4 hrs)");
 
             var exitResult2 = parkingService.ProcessExit(ticket2.TicketId, carExitTime);
-            Console.WriteLine($"✅ [EXIT COMPLETED]");
+            Console.WriteLine($"[EXIT COMPLETED]");
             Console.WriteLine($"   Vehicle: {exitResult2.Vehicle}");
             Console.WriteLine($"   Duration: {exitResult2.Duration.Hours}h {exitResult2.Duration.Minutes}m");
             Console.WriteLine($"   Fee Strategy: {exitResult2.StrategyUsed}");
@@ -126,12 +125,12 @@ namespace ParkingLotManagementSystem
             PrintSection("OPERATION 7: Validation Edge Case - Attempting Repeated Exit");
             try
             {
-                Console.WriteLine($"⚠️ Attempting to unpark using ticket '{ticket2.TicketId}' a second time...");
+                Console.WriteLine($"[ATTEMPT] Attempting to unpark using ticket '{ticket2.TicketId}' a second time...");
                 parkingService.ProcessExit(ticket2.TicketId, carExitTime.AddMinutes(10));
             }
             catch (TicketAlreadyExitedException ex)
             {
-                Console.WriteLine($"❌ [EXPECTED EXCEPTION CAUGHT] {ex.Message}");
+                Console.WriteLine($"[EXPECTED EXCEPTION CAUGHT] {ex.Message}");
             }
 
             // --------------------------------------------------------------------------------
@@ -141,12 +140,12 @@ namespace ParkingLotManagementSystem
             try
             {
                 string invalidTicketId = "PRK-LOT01-F9-S99-99999";
-                Console.WriteLine($"⚠️ Attempting to exit with invalid ticket ID '{invalidTicketId}'...");
+                Console.WriteLine($"[ATTEMPT] Attempting to exit with invalid ticket ID '{invalidTicketId}'...");
                 parkingService.ProcessExit(invalidTicketId, DateTime.Now);
             }
             catch (InvalidTicketException ex)
             {
-                Console.WriteLine($"❌ [EXPECTED EXCEPTION CAUGHT] {ex.Message}");
+                Console.WriteLine($"[EXPECTED EXCEPTION CAUGHT] {ex.Message}");
             }
 
             // --------------------------------------------------------------------------------
@@ -156,15 +155,15 @@ namespace ParkingLotManagementSystem
 
             var tieredStrategy = FeeStrategyFactory.CreateStrategy(FeeStrategyType.TIERED_RATES);
             parkingService.SetFeeStrategy(tieredStrategy);
-            Console.WriteLine($"🔄 Fee Strategy switched to: '{tieredStrategy.StrategyName}'");
+            Console.WriteLine($"[STRATEGY SWITCH] Fee Strategy switched to: '{tieredStrategy.StrategyName}'");
 
             DateTime bikeParkTime = baseTime;
             DateTime bikeExitTime = baseTime.AddHours(4); // 4 Hours
 
-            Console.WriteLine($"ℹ️ Processing Bike exit ('{ticket1.LicensePlate}') after 4 hours with Tiered Strategy...");
+            Console.WriteLine($"[INFO] Processing Bike exit ('{ticket1.LicensePlate}') after 4 hours with Tiered Strategy...");
             var bikeExitResult = parkingService.ProcessExit(ticket1.TicketId, bikeExitTime);
 
-            Console.WriteLine($"✅ [EXIT COMPLETED]");
+            Console.WriteLine($"[EXIT COMPLETED]");
             Console.WriteLine($"   Strategy Used: {bikeExitResult.StrategyUsed}");
             Console.WriteLine($"   Fee Calculation: 4 hours (First 2 hrs = $15.00 base, Next 2 hrs @ $5/hr = $10.00)");
             Console.WriteLine($"   Total Fee Charged: ${bikeExitResult.TotalFee:F2}");
@@ -175,10 +174,10 @@ namespace ParkingLotManagementSystem
             PrintSection("OPERATION 10: Design Pattern Demo - Switching Allocation Strategy (Highest Floor First)");
 
             parkingService.SetAllocationStrategy(new HighestFloorFirstAllocationStrategy());
-            Console.WriteLine($"🔄 Slot Allocation Strategy switched to: 'HighestFloorFirstAllocationStrategy'");
+            Console.WriteLine($"[STRATEGY SWITCH] Slot Allocation Strategy switched to: 'HighestFloorFirstAllocationStrategy'");
 
             var ticketTopFloor = parkingService.ParkVehicle(VehicleType.CAR, "KA-02-HF-7777", "Silver", baseTime);
-            Console.WriteLine($"✅ [PARK SUCCESS] Car parked at: Floor {ticketTopFloor.FloorNumber}, Slot {ticketTopFloor.SlotId}");
+            Console.WriteLine($"[PARK SUCCESS] Car parked at: Floor {ticketTopFloor.FloorNumber}, Slot {ticketTopFloor.SlotId}");
 
             PrintSection("PARKING LOT SYSTEM DEMO COMPLETED SUCCESSFULLY!");
         }
@@ -195,19 +194,19 @@ namespace ParkingLotManagementSystem
         {
             Console.WriteLine();
             Console.WriteLine(new string('-', 80));
-            Console.WriteLine($"▶ {header}");
+            Console.WriteLine($">>> {header}");
             Console.WriteLine(new string('-', 80));
         }
 
         private static void DisplayOccupancyReport(OccupancyReport report)
         {
             Console.WriteLine();
-            Console.WriteLine($"📊 --- PARKING LOT OCCUPANCY REPORT: '{report.ParkingLotName}' ---");
+            Console.WriteLine($"--- PARKING LOT OCCUPANCY REPORT: '{report.ParkingLotName}' ---");
             Console.WriteLine($"   Overall Capacity: {report.TotalCapacity} slots | Occupied: {report.TotalOccupied} | Free: {report.TotalFree}");
             Console.WriteLine();
             foreach (var f in report.FloorDetails)
             {
-                Console.WriteLine($"   🏢 Floor {f.FloorNumber}: Total: {f.TotalSlots} | Occupied: {f.OccupiedSlots} | Free: {f.FreeSlots}");
+                Console.WriteLine($"   Floor {f.FloorNumber}: Total: {f.TotalSlots} | Occupied: {f.OccupiedSlots} | Free: {f.FreeSlots}");
                 Console.WriteLine($"      - Bike Free: {f.FreeSlotsByVehicleType[VehicleType.BIKE]} | Car Free: {f.FreeSlotsByVehicleType[VehicleType.CAR]} | Truck Free: {f.FreeSlotsByVehicleType[VehicleType.TRUCK]}");
             }
             Console.WriteLine();
